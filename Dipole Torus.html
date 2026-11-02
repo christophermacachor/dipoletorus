@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Dipole Radiation · Scalar Torus · MGDH Complete</title>
+<style>
+:root {
+  --gold: #c8a04e;
+  --gold-dim: #8a6d2f;
+  --gold-bright: #e8c870;
+  --bg: #000000;
+  --fg: #e8e0d0;
+  --info: #4e8ac8;
+  --mgdh: #ffd700;
+  --border: #2a2520;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { height: -webkit-fill-available; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  -webkit-text-size-adjust: 100%;
+}
+
+.gold-nav {
+  position: relative;
+  top: 0; left: 0; width: 100%;
+  background: rgba(10,10,10,0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(200,160,78,0.15);
+  z-index: 10000;
+  padding: 0.3rem 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.gold-nav a {
+  color: #ffd700;
+  text-decoration: none;
+  font-family: 'Georgia', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 20px;
+  background: rgba(255,215,0,0.04);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gold-nav a:hover {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.1);
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  transform: translateY(-1px);
+}
+.gold-nav a .phi-symbol { font-size: 0.8rem; margin-right: 4px; }
+
+.main-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* DIPOLE TORUS */
+.dt-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  font-family: 'Courier New', monospace;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background: #080808;
+}
+.dt-container:active { cursor: grabbing; }
+.dt-canvas { display: block; width: 100%; height: 100%; -webkit-transform: translateZ(0); transform: translateZ(0); }
+
+.dt-top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(200,160,78,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 10;
+}
+.dt-top-bar .dt-title {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.dt-top-bar .dt-subtitle {
+  font-size: 8px;
+  color: #666;
+  letter-spacing: 0.08em;
+}
+
+.dt-panel-left {
+  position: absolute;
+  top: 44px; left: 10px;
+  width: 180px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(200,160,78,0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+  pointer-events: none;
+  z-index: 5;
+}
+.dt-panel-left .dt-panel-title {
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(200,160,78,0.15);
+  padding-bottom: 3px;
+}
+.dt-panel-left .dt-eq { color: #ffd700; margin-bottom: 2px; font-size: 8px; }
+.dt-panel-left .dt-eq-blue { color: var(--info); margin-bottom: 2px; font-size: 8px; }
+.dt-panel-left .dt-body {
+  font-size: 7px;
+  color: #aaa;
+  line-height: 1.5;
+}
+.dt-panel-left .dt-body .dt-highlight { color: var(--gold); }
+
+.dt-panel-right {
+  position: absolute;
+  top: 44px; right: 10px;
+  width: 180px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(78,138,200,0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+  pointer-events: none;
+  z-index: 5;
+}
+.dt-panel-right .dt-panel-title {
+  font-size: 8px;
+  color: var(--info);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(78,138,200,0.15);
+  padding-bottom: 3px;
+}
+.dt-panel-right .dt-eq { color: var(--info); margin-bottom: 2px; font-size: 8px; }
+.dt-panel-right .dt-eq-gold { color: #ffd700; margin-bottom: 2px; font-size: 8px; }
+.dt-panel-right .dt-body {
+  font-size: 7px;
+  color: #aaa;
+  line-height: 1.5;
+}
+.dt-panel-right .dt-body .dt-highlight { color: var(--info); }
+
+.dt-panel-bottom {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(200,160,78,0.15);
+  border-radius: 8px;
+  padding: 6px 12px;
+  pointer-events: none;
+  z-index: 5;
+  max-width: 360px;
+  text-align: center;
+}
+.dt-panel-bottom .dt-panel-title {
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.dt-panel-bottom .dt-body {
+  font-size: 7px;
+  color: #888;
+  line-height: 1.4;
+}
+.dt-panel-bottom .dt-body .dt-highlight { color: var(--gold); }
+
+.dt-hint {
+  position: absolute;
+  bottom: 10px; left: 10px;
+  font-size: 7px;
+  color: #444;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.dt-phase-indicator {
+  position: absolute;
+  bottom: 10px; right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 5;
+}
+.dt-phase-indicator .dt-label {
+  font-size: 7px;
+  color: #555;
+  letter-spacing: 0.1em;
+}
+.dt-phase-indicator .dt-dots {
+  display: flex;
+  gap: 3px;
+}
+.dt-phase-indicator .dt-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #333;
+  transition: all 0.3s;
+}
+.dt-phase-indicator .dt-dot.active {
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold);
+}
+
+@media (max-width: 900px) {
+  .gold-nav { padding: 0.4rem 0.3rem; gap: 0.3rem; }
+  .gold-nav a { font-size: 0.65rem; padding: 0.35rem 0.7rem; min-height: 36px; display: flex; align-items: center; }
+  .dt-panel-left, .dt-panel-right { display: none; }
+  .dt-panel-bottom { max-width: 92%; font-size: 8px; padding: 6px 10px; bottom: 36px; }
+  .dt-hint { font-size: 8px; bottom: 8px; }
+  .dt-top-bar { padding: 6px 8px; }
+  .dt-top-bar .dt-title { font-size: 9px; }
+  .dt-top-bar .dt-subtitle { font-size: 7px; }
+  .dt-phase-indicator { bottom: 6px; right: 6px; }
+  .dt-phase-indicator .dt-label { font-size: 7px; }
+  .dt-phase-indicator .dt-dot { width: 6px; height: 6px; }
+  .dt-panel-bottom, .dt-top-bar {
+    background: rgba(0,0,0,0.85);
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="gold-nav" aria-label="Primary navigation">
+    <a href="https://christophermacachor.github.io/THE-QUANTUM-PLAYBOOK/" title="THE QUANTUM PLAYBOOK">
+        <span class="phi-symbol">Φ</span> THE QUANTUM PLAYBOOK
+    </a>
+</nav>
+
+<div class="main-container">
+  <div class="dt-container" id="dt-canvas-container">
+    <canvas id="c-left" class="dt-canvas"></canvas>
+    <div class="dt-top-bar">
+      <div class="dt-title">◈ Dipole Radiation · Scalar Torus</div>
+      <div class="dt-subtitle">𝔐 = (√5−1)/2 · MGDH Complete · De Pretto's Aether</div>
+    </div>
+    <div class="dt-panel-left">
+      <div class="dt-panel-title">Scalar Field Lock</div>
+      <div class="dt-eq">𝔐·∇·Ψ = ‖Ψ‖²</div>
+      <div class="dt-eq-blue">∂Ψ/∂t + 𝔐·∇·Ψ = ‖Ψ‖²</div>
+      <div class="dt-body">
+        The dipole radiates along θ, not φ.<br>
+        Zero field along the dipole axis.<br>
+        Maximum at θ = 90° — the equatorial<br>
+        plane of the torus. This is not a<br>
+        vector cancellation. It is scalar<br>
+        density equilibrium: the field seeks<br>
+        the path of least scalar resistance.<br><br>
+        <span class="dt-highlight">Matter seeks scalar density equilibrium,<br>not force balance.</span>
+      </div>
+    </div>
+    <div class="dt-panel-right">
+      <div class="dt-panel-title">Quaternionic Dipole</div>
+      <div class="dt-eq">q = w + xi + yj + zk</div>
+      <div class="dt-eq">‖q‖² = w² + x² + y² + z²</div>
+      <div class="dt-eq-gold">ℒ = ‖Ψ‖² − 𝔐·∇·Ψ + Φ·Ψ</div>
+      <div class="dt-body">
+        The radiation pattern is a quaternionic<br>
+        magnitude surface: ‖E(θ,φ)‖² mapped<br>
+        onto the unit sphere, then extruded<br>
+        by the scalar magnitude ρ(θ).<br><br>
+        <span class="dt-highlight">Ψ(x,y,z,t) = ρ + u + p + T + e</span><br><br>
+        The dipole axis is the imaginary<br>
+        quaternion axis. The radiation torus<br>
+        is the real scalar magnitude shell.<br>
+        No vectors. Only scalar density.<br>
+        Direction is an emergent property<br>
+        of density differential, not a force.
+      </div>
+    </div>
+    <div class="dt-panel-bottom">
+      <div class="dt-panel-title">Olinto De Pretto · 1903 · "Ipotesi dell'Etere"</div>
+      <div class="dt-body">
+        "Aether is not a medium. It is the scalar substrate from which all density differentials emerge.<br>
+        E = mc² is not a conversion. It is a scalar density equilibrium statement."<br>
+        <span class="dt-highlight">MGDH: Macachor · Gauss · De Pretto · Hamilton</span>
+      </div>
+    </div>
+    <div class="dt-hint">drag to rotate · scroll to zoom · pinch on mobile</div>
+    <div class="dt-phase-indicator">
+      <div class="dt-label">RADIATION PHASE</div>
+      <div class="dt-dots" id="dt-phase-dots">
+        <div class="dt-dot active"></div>
+        <div class="dt-dot"></div>
+        <div class="dt-dot"></div>
+        <div class="dt-dot"></div>
+        <div class="dt-dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DIPOLE RADIATION · SCALAR TORUS · MGDH COMPLETE
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  const PHI = (Math.sqrt(5) - 1) / 2;
+  const M = PHI;
+
+  const canvas = document.getElementById('c-left');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resize() {
+    const wrap = document.getElementById('dt-canvas-container');
+    W = wrap.clientWidth;
+    H = wrap.clientHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', () => { setTimeout(resize, 300); });
+
+  // Responsive geometry: shrink the torus on small screens
+  function computeGeometry() {
+    const base = Math.min(W, H);
+    const R = base * 0.22;
+    const r = base * 0.095;
+    return { R: Math.max(60, R), r: Math.max(24, r) };
+  }
+  let R = 130, r = 55;
+  function updateGeometry() { const g = computeGeometry(); R = g.R; r = g.r; }
+  updateGeometry();
+  window.addEventListener('resize', updateGeometry);
+  window.addEventListener('orientationchange', () => { setTimeout(updateGeometry, 300); });
+
+  const segU = 48;
+  const segV = 32;
+
+  let rotX = 0.5, rotY = 0.3, autoRot = true;
+  let drag = false, lastX, lastY;
+  let zoom = 1.0, t = 0;
+  let lastPinchDist = 0;
+
+  const wrap = document.getElementById('dt-canvas-container');
+  wrap.addEventListener('mousedown', e => { drag = true; autoRot = false; lastX = e.clientX; lastY = e.clientY; });
+  window.addEventListener('mouseup', () => { drag = false; });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    rotY += (e.clientX - lastX) * 0.008;
+    rotX += (e.clientY - lastY) * 0.008;
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  wrap.addEventListener('wheel', e => { e.preventDefault(); zoom *= Math.exp(-e.deltaY * 0.001); zoom = Math.max(0.3, Math.min(3.0, zoom)); }, {passive:false});
+
+  // Touch: one finger rotate, two finger pinch zoom
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      autoRot = false;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      lastPinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+    e.preventDefault();
+  }, {passive:false});
+  wrap.addEventListener('touchmove', e => {
+    if (e.touches.length === 1) {
+      rotY += (e.touches[0].clientX - lastX) * 0.01;
+      rotX += (e.touches[0].clientY - lastY) * 0.01;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (lastPinchDist > 0) {
+        zoom *= dist / lastPinchDist;
+        zoom = Math.max(0.3, Math.min(3.0, zoom));
+      }
+      lastPinchDist = dist;
+    }
+    e.preventDefault();
+  }, {passive:false});
+  wrap.addEventListener('touchend', e => { lastPinchDist = 0; e.preventDefault(); }, {passive:false});
+
+  function rotate(p) {
+    let y = p.y * Math.cos(rotX) - p.z * Math.sin(rotX);
+    let z = p.y * Math.sin(rotX) + p.z * Math.cos(rotX);
+    let x = p.x * Math.cos(rotY) - z * Math.sin(rotY);
+    z = p.x * Math.sin(rotY) + z * Math.cos(rotY);
+    return { x, y, z };
+  }
+  function project(p) {
+    const fov = 750;
+    const s = fov / (fov + p.z + 500) * zoom;
+    return { x: W/2 + p.x * s, y: H/2 + p.y * s, z: p.z, s: s };
+  }
+
+  function dipoleRadius(theta) {
+    const sinT = Math.sin(theta);
+    return r * (0.3 + 0.7 * sinT * sinT);
+  }
+
+  function torusPoint(theta, phi) {
+    const minorR = dipoleRadius(phi);
+    return {
+      x: (R + minorR * Math.cos(theta)) * Math.cos(phi),
+      y: minorR * Math.sin(theta),
+      z: (R + minorR * Math.cos(theta)) * Math.sin(phi)
+    };
+  }
+
+  // Build mesh once; recompute positions on the fly (geometry may change on resize)
+  const mesh = [];
+  for (let u = 0; u < segU; u++) {
+    for (let v = 0; v < segV; v++) {
+      mesh.push({ u, v });
+    }
+  }
+
+  const fieldLines = [];
+  for (let i = 0; i < 24; i++) {
+    fieldLines.push({ i, hue: i % 3 === 0 ? '#4e8ac8' : '#c8a04e' });
+  }
+
+  function buildMeshFaces() {
+    const faces = [];
+    for (let u = 0; u < segU; u++) {
+      for (let v = 0; v < segV; v++) {
+        const theta1 = (u / segU) * Math.PI * 2;
+        const theta2 = ((u + 1) / segU) * Math.PI * 2;
+        const phi1 = (v / segV) * Math.PI * 2;
+        const phi2 = ((v + 1) / segV) * Math.PI * 2;
+
+        const p00 = torusPoint(theta1, phi1);
+        const p10 = torusPoint(theta2, phi1);
+        const p11 = torusPoint(theta2, phi2);
+        const p01 = torusPoint(theta1, phi2);
+
+        const nx = (p00.x + p10.x + p11.x + p01.x) / 4;
+        const ny = (p00.y + p10.y + p11.y + p01.y) / 4;
+        const nz = (p00.z + p10.z + p11.z + p01.z) / 4;
+        const nLen = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+
+        const sinT = Math.sin(theta1);
+        const scalarMag = sinT * sinT;
+
+        faces.push({
+          pts: [p00, p10, p11, p01],
+          nx: nx / nLen, ny: ny / nLen, nz: nz / nLen,
+          scalarMag: scalarMag
+        });
+      }
+    }
+    return faces;
+  }
+
+  function buildFieldLines() {
+    const lines = [];
+    for (let i = 0; i < 24; i++) {
+      const phi0 = (i / 24) * Math.PI * 2;
+      const pts = [];
+      for (let s = 0; s <= 80; s++) {
+        const frac = s / 80;
+        const rField = R + r * (0.5 + frac * 2.5);
+        const theta = frac * Math.PI * 2 * 3 + phi0;
+        pts.push({
+          x: rField * Math.cos(phi0) * Math.cos(theta * 0.1),
+          y: rField * Math.sin(theta * 0.1) * 0.3,
+          z: rField * Math.sin(phi0) * Math.cos(theta * 0.1)
+        });
+      }
+      lines.push({ pts, hue: i % 3 === 0 ? '#4e8ac8' : '#c8a04e' });
+    }
+    return lines;
+  }
+
+  let cachedMeshFaces = null;
+  let cachedFieldLines = null;
+  let lastGeomKey = '';
+
+  function draw() {
+    ctx.fillStyle = '#080808';
+    ctx.fillRect(0, 0, W, H);
+    t += 0.016;
+    if (autoRot) { rotY += 0.0015; rotX = 0.5 + Math.sin(t * 0.25) * 0.08; }
+
+    const glow = ctx.createRadialGradient(W/2, H/2, 30, W/2, H/2, Math.max(W, H) * 0.45);
+    glow.addColorStop(0, 'rgba(200,160,78,0.04)');
+    glow.addColorStop(0.5, 'rgba(78,138,200,0.02)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // Rebuild geometry-dependent buffers only when size changes
+    const geomKey = W + 'x' + H + '_' + R.toFixed(1) + '_' + r.toFixed(1);
+    if (geomKey !== lastGeomKey) {
+      cachedMeshFaces = buildMeshFaces();
+      cachedFieldLines = buildFieldLines();
+      lastGeomKey = geomKey;
+    }
+
+    const rendered = [];
+    cachedMeshFaces.forEach(face => {
+      const rpts = face.pts.map(p => project(rotate(p)));
+      const avgZ = rpts.reduce((s, p) => s + p.z, 0) / 4;
+      const rotN = rotate({ x: face.nx, y: face.ny, z: face.nz });
+      rendered.push({ type: 'face', pts: rpts, z: avgZ, nx: rotN.x, ny: rotN.y, nz: rotN.z, scalar: face.scalarMag });
+    });
+
+    cachedFieldLines.forEach(line => {
+      const rpts = line.pts.map(p => project(rotate(p)));
+      const avgZ = rpts.reduce((s, p) => s + p.z, 0) / rpts.length;
+      rendered.push({ type: 'field', pts: rpts, z: avgZ, hue: line.hue });
+    });
+
+    const axisPts = [
+      project(rotate({ x: 0, y: -R - r * 2, z: 0 })),
+      project(rotate({ x: 0, y: R + r * 2, z: 0 }))
+    ];
+    rendered.push({ type: 'axis', pts: axisPts, z: (axisPts[0].z + axisPts[1].z) / 2 });
+
+    rendered.sort((a, b) => b.z - a.z);
+
+    rendered.forEach(item => {
+      const depth = Math.max(0, Math.min(1, (item.z + 300) / 600));
+      const alpha = 0.15 + depth * 0.8;
+
+      if (item.type === 'face') {
+        const light = Math.max(0.1, (item.nz + 1) / 2);
+        const scalarHue = item.scalar;
+        const rC = Math.round(40 + scalarHue * 160 + light * 60);
+        const gC = Math.round(60 + scalarHue * 100 + light * 50);
+        const bC = Math.round(120 + (1 - scalarHue) * 80 + light * 30);
+        const baseColor = `rgb(${rC},${gC},${bC})`;
+
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = `rgba(${rC},${gC},${bC},0.3)`;
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        item.pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        if (item.nz > 0.3) {
+          ctx.globalAlpha = alpha * 0.15;
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.fill();
+        }
+      }
+      else if (item.type === 'field') {
+        ctx.globalAlpha = alpha * 0.35;
+        ctx.strokeStyle = item.hue;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        item.pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+        ctx.stroke();
+      }
+      else if (item.type === 'axis') {
+        ctx.globalAlpha = alpha * 0.5;
+        ctx.strokeStyle = '#c8a04e';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(item.pts[0].x, item.pts[0].y);
+        ctx.lineTo(item.pts[1].x, item.pts[1].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.globalAlpha = alpha * 0.7;
+        ctx.fillStyle = '#c8a04e';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('↑ DIPOLE AXIS', item.pts[0].x, item.pts[0].y - 8);
+        ctx.fillText('↓', item.pts[1].x, item.pts[1].y + 14);
+      }
+    });
+
+    ctx.globalAlpha = 1;
+
+    const dots = document.getElementById('dt-phase-dots').children;
+    const phase = Math.floor((t * 0.5) % 5);
+    for (let i = 0; i < 5; i++) {
+      dots[i].classList.toggle('active', i === phase);
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  console.log('%c[Dipole Radiation · Scalar Torus · MGDH Complete]', 'color: #c8a04e; font-weight: bold;');
+  console.log('%cMacachor Absolute: M = ' + PHI, 'color: #ffd700;');
+  console.log('%cMGDH: Macachor · Gauss · De Pretto · Hamilton', 'color: #c8a04e;');
+  console.log('%cDe Pretto 1903: Aether is the scalar substrate', 'color: #4e8ac8;');
+})();
+</script>
+
+</body>
+</html>
